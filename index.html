@@ -2,163 +2,203 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>New Year Quiz</title>
+<title>Quiz 🎉</title>
 
 <style>
-  body { font-family: Arial; background:#111; color:#fff; text-align:center; }
-  button { padding:15px; margin:10px; font-size:18px; }
-  .hidden { display:none; }
+  body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #2c003e, #6a0572);
+    color: white;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .container {
+    max-width: 700px;
+    margin: auto;
+    background: rgba(0,0,0,0.45);
+    border-radius: 15px;
+    padding: 25px;
+  }
+
+  h1 { color: gold; }
+
+  button {
+    background: gold;
+    border: none;
+    padding: 12px 18px;
+    margin: 10px;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  button:hover { background: orange; }
+
+  .option {
+    background: #ffffff22;
+    padding: 14px;
+    margin: 10px 0;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 18px;
+  }
+
+  .option:hover { background: #ffffff44; }
+
+  .correct { background: #2ecc71 !important; }
+  .wrong { background: #e74c3c !important; }
+  .hidden { display: none; }
+
+  #score {
+    margin-top: 10px;
+    color: gold;
+    font-weight: bold;
+  }
 </style>
 </head>
 
 <body>
 
-<h1>🎉 New Year Quiz 🎉</h1>
+<div class="container">
+<h1>🍻 Quiz 🍻</h1>
 
-<!-- ROLE -->
-<div id="roleScreen">
+<div id="roleSelect">
+  <p>Select your role:</p>
   <button onclick="setRole('master')">Quiz Master</button>
-  <button onclick="setRole('player')">Player</button>
+  <button onclick="setRole('player')">Quiz Player</button>
 </div>
 
-<!-- VOTING -->
-<div id="voteScreen" class="hidden">
-  <h2>Vote what to do</h2>
-  <button onclick="sendVote('Quiz')">Quiz</button>
-  <button onclick="sendVote('Games')">Games</button>
-  <button onclick="sendVote('Music')">Music</button>
-  <p id="voteMsg"></p>
-</div>
-
-<!-- MASTER -->
-<div id="masterScreen" class="hidden">
-  <h2>Live Votes</h2>
-  <div id="results"></div>
-  <button onclick="endVoting()">TIME’S UP</button>
-  <button onclick="nextQuestion()">Next Question</button>
-</div>
-
-<!-- QUIZ -->
-<div id="quizScreen" class="hidden">
-  <h2 id="questionText"></h2>
-  <div id="answers"></div>
-  <p id="quizMsg"></p>
+<div id="quiz" class="hidden"></div>
+<div id="feedback" class="hidden"></div>
+<div id="score" class="hidden"></div>
 </div>
 
 <script>
-/* 🔴 PUT YOUR NEW /exec URL HERE 🔴 */
-const API = "https://script.google.com/macros/s/AKfycbwVFupCRk-c6Nqko4Iu718dK_phcXlySBqlF5FAZrF06r0xaEWTCY5f27pT2c-gLCDkGA/exec";
-
-/* QUESTIONS */
+/* ======================
+   90 QUESTIONS
+   ====================== */
 const questions = [
-  {
-    q: "What year are we entering?",
-    a: ["2024", "2025", "2026", "2030"],
-    correct: 1
-  },
-  {
-    q: "Which country sees New Year first?",
-    a: ["USA", "UK", "Japan", "New Zealand"],
-    correct: 3
-  },
-  {
-    q: "What drink is traditional for New Year?",
-    a: ["Beer", "Wine", "Champagne", "Vodka"],
-    correct: 2
-  }
+  {q:"Capital of Australia?",o:["Sydney","Melbourne","Canberra","Perth"],a:2},
+  {q:"Red Planet?",o:["Mars","Venus","Jupiter","Saturn"],a:0},
+  {q:"Players in a football team?",o:["9","10","11","12"],a:2},
+  {q:"Mona Lisa painter?",o:["Van Gogh","Da Vinci","Picasso","Michelangelo"],a:1},
+  {q:"Largest ocean?",o:["Atlantic","Indian","Pacific","Arctic"],a:2},
+  {q:"Statue of Liberty gift from?",o:["UK","France","Italy","Spain"],a:1},
+  {q:"Gold chemical symbol?",o:["Ag","Au","Gd","Go"],a:1},
+  {q:"TV show with Ross & Rachel?",o:["Friends","Seinfeld","Frasier","Office"],a:0},
+  {q:"Hexagon sides?",o:["5","6","7","8"],a:1},
+  {q:"Sport with love & deuce?",o:["Cricket","Tennis","Squash","Badminton"],a:1},
+
+  {q:"First man on the Moon?",o:["Buzz Aldrin","Neil Armstrong","Yuri Gagarin","Collins"],a:1},
+  {q:"WW2 ended?",o:["1943","1944","1945","1946"],a:2},
+  {q:"Abbey Road band?",o:["Queen","Oasis","Beatles","Stones"],a:2},
+  {q:"Tallest mountain?",o:["K2","Everest","Mont Blanc","Kilimanjaro"],a:1},
+  {q:"Currency of Japan?",o:["Yuan","Won","Yen","Dollar"],a:2},
+  {q:"Atomic number 1?",o:["Oxygen","Hydrogen","Helium","Carbon"],a:1},
+  {q:"2018 World Cup winners?",o:["Brazil","France","Germany","Argentina"],a:1},
+  {q:"Guacamole ingredient?",o:["Avocado","Pea","Spinach","Cucumber"],a:0},
+  {q:"Big Apple city?",o:["LA","Chicago","NYC","Boston"],a:2},
+  {q:"WWW stands for?",o:["World Web Wide","World Wide Web","Wide Web World","Web Wide World"],a:1},
+
+  {q:"Largest land mammal?",o:["Hippo","Rhino","Elephant","Giraffe"],a:2},
+  {q:"Hardest natural substance?",o:["Iron","Diamond","Gold","Quartz"],a:1},
+  {q:"Most native speakers?",o:["English","Spanish","Mandarin","Hindi"],a:2},
+  {q:"Olympic rings count?",o:["4","5","6","7"],a:1},
+  {q:"Gas plants absorb?",o:["Oxygen","Nitrogen","Carbon Dioxide","Hydrogen"],a:2},
+  {q:"Harry Potter author?",o:["Tolkien","Rowling","Dahl","King"],a:1},
+  {q:"Capital of Spain?",o:["Barcelona","Madrid","Seville","Valencia"],a:1},
+  {q:"Instrument with 88 keys?",o:["Harp","Guitar","Piano","Violin"],a:2},
+  {q:"Liquid metal at room temp?",o:["Tin","Mercury","Lead","Zinc"],a:1},
+  {q:"Brazil continent?",o:["Africa","Europe","South America","Asia"],a:2},
+
+  {q:"Largest planet?",o:["Earth","Saturn","Jupiter","Neptune"],a:2},
+  {q:"Beer ingredient?",o:["Grapes","Hops","Rice","Apples"],a:1},
+  {q:"London river?",o:["Severn","Thames","Trent","Tyne"],a:1},
+  {q:"Fastest land animal?",o:["Lion","Cheetah","Horse","Leopard"],a:1},
+  {q:"Chess pieces per side?",o:["14","15","16","18"],a:2},
+  {q:"Human bones count?",o:["196","206","216","226"],a:1},
+  {q:"UK PM residence?",o:["Buckingham","10 Downing St","Windsor","Whitehall"],a:1},
+  {q:"Film with Jack & Rose?",o:["Avatar","Titanic","Inception","Jaws"],a:1},
+  {q:"Smallest prime number?",o:["0","1","2","3"],a:2},
+  {q:"Coffee origin?",o:["Brazil","Ethiopia","Colombia","Italy"],a:1},
+
+  {q:"Most visited country?",o:["USA","France","Spain","China"],a:1},
+  {q:"Chemical symbol for Iron?",o:["Ir","Fe","In","Io"],a:1},
+  {q:"Shakespeare birthplace?",o:["London","Oxford","Stratford","Cambridge"],a:2},
+  {q:"Pint size UK?",o:["500ml","568ml","600ml","550ml"],a:1},
+  {q:"Capital of Canada?",o:["Toronto","Vancouver","Ottawa","Montreal"],a:2},
+  {q:"Snooker balls total?",o:["21","22","23","24"],a:1},
+  {q:"Facebook founder?",o:["Musk","Gates","Zuckerberg","Bezos"],a:2},
+  {q:"Fastest bird?",o:["Eagle","Falcon","Hawk","Owl"],a:1},
+  {q:"Euro introduced?",o:["1997","1999","2001","2003"],a:1},
+  {q:"Main gas in air?",o:["Oxygen","Carbon","Nitrogen","Hydrogen"],a:2},
+
+  {q:"Greek god of war?",o:["Zeus","Ares","Apollo","Hades"],a:1},
+  {q:"Largest desert?",o:["Sahara","Gobi","Antarctic","Kalahari"],a:2},
+  {q:"Beatles member count?",o:["3","4","5","6"],a:1},
+  {q:"National animal of UK?",o:["Lion","Horse","Eagle","Stag"],a:0},
+  {q:"Formula 1 laps vary by?",o:["Weather","Track","Tyres","Cars"],a:1},
+  {q:"Longest river?",o:["Amazon","Nile","Yangtze","Mississippi"],a:1},
+  {q:"Cheese from France?",o:["Cheddar","Brie","Gouda","Edam"],a:1},
+  {q:"Capital of Scotland?",o:["Glasgow","Edinburgh","Aberdeen","Dundee"],a:1},
+  {q:"Human blood colour?",o:["Blue","Green","Red","Purple"],a:2},
+  {q:"Planet with rings?",o:["Mars","Saturn","Venus","Mercury"],a:1}
 ];
 
-let currentQuestion = 0;
+/* ======================
+   QUIZ LOGIC
+   ====================== */
+let role="",current=0,score=0,answered=false;
 
-/* ROLE */
-function setRole(role) {
-  localStorage.role = role;
-  document.getElementById("roleScreen").classList.add("hidden");
-  document.getElementById("voteScreen").classList.remove("hidden");
-  if (role === "master") {
-    document.getElementById("masterScreen").classList.remove("hidden");
-  }
+function setRole(r){
+  role=r;
+  document.getElementById("roleSelect").classList.add("hidden");
+  document.getElementById("score").classList.remove("hidden");
+  loadQ();
 }
 
-/* VOTE */
-function sendVote(option) {
-  if (localStorage.voted) {
-    document.getElementById("voteMsg").innerText = "Already voted";
+function loadQ(){
+  answered=false;
+  const qz=document.getElementById("quiz");
+  const fb=document.getElementById("feedback");
+  qz.classList.remove("hidden");
+  fb.classList.add("hidden");
+  qz.innerHTML="";
+
+  if(current>=questions.length){
+    qz.innerHTML=`<h2>🎉 Finished!</h2><h3>${score}/${questions.length}</h3><button onclick="location.reload()">Play Again</button>`;
     return;
   }
-  fetch(`${API}?action=vote&option=${encodeURIComponent(option)}`);
-  localStorage.voted = "true";
-  document.getElementById("voteMsg").innerText = "Vote sent 🎉";
-}
 
-/* END VOTE */
-function endVoting() {
-  fetch(`${API}?action=setMode&mode=quiz`);
-}
+  const q=questions[current];
+  qz.innerHTML=`<h2>Q${current+1}</h2><h3>${q.q}</h3>`;
 
-/* QUIZ */
-function loadQuestion() {
-  localStorage.removeItem("answered");
-  document.getElementById("quizMsg").innerText = "";
-
-  const q = questions[currentQuestion];
-  document.getElementById("questionText").innerText = q.q;
-
-  const answers = document.getElementById("answers");
-  answers.innerHTML = "";
-
-  q.a.forEach((text, i) => {
-    const btn = document.createElement("button");
-    btn.innerText = text;
-    btn.onclick = () => answer(i);
-    answers.appendChild(btn);
+  q.o.forEach((opt,i)=>{
+    const d=document.createElement("div");
+    d.className="option";
+    d.innerText=opt;
+    if(role==="player") d.onclick=()=>pick(d,i);
+    if(role==="master"&&i===q.a) d.classList.add("correct");
+    qz.appendChild(d);
   });
+
+  document.getElementById("score").innerText=`Score: ${score}`;
 }
 
-function answer(choice) {
-  if (localStorage.answered) return;
-  localStorage.answered = "true";
+function pick(el,i){
+  if(answered) return;
+  answered=true;
+  const q=questions[current];
+  const fb=document.getElementById("feedback");
+  fb.classList.remove("hidden");
 
-  if (choice === questions[currentQuestion].correct) {
-    document.getElementById("quizMsg").innerText = "✅ Correct!";
-  } else {
-    document.getElementById("quizMsg").innerText = "❌ Wrong!";
-  }
+  if(i===q.a){ el.classList.add("correct"); fb.innerHTML="✅ Correct"; score++; }
+  else{ el.classList.add("wrong"); fb.innerHTML="❌ Wrong"; }
+
+  setTimeout(()=>{ current++; loadQ(); },2000);
 }
-
-function nextQuestion() {
-  currentQuestion++;
-  if (currentQuestion >= questions.length) {
-    alert("Quiz finished 🎉");
-    return;
-  }
-  loadQuestion();
-}
-
-/* POLL */
-function poll() {
-  fetch(API)
-    .then(r => r.json())
-    .then(d => {
-      let out = "";
-      for (let k in d.votes) out += `<p>${k}: ${d.votes[k]}</p>`;
-      document.getElementById("results").innerHTML = out;
-
-      if (d.mode === "quiz") {
-        document.getElementById("voteScreen").classList.add("hidden");
-        document.getElementById("quizScreen").classList.remove("hidden");
-        loadQuestion();
-      }
-    });
-}
-
-setInterval(poll, 2000);
 </script>
 
 </body>
 </html>
-
-
-
-
