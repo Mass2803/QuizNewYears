@@ -1,89 +1,160 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>New Year Party</title>
+<title>🎉 New Year Party 🎉</title>
+
 <style>
-body { font-family: Arial; text-align:center; }
-button { padding:15px; margin:10px; font-size:18px; }
-.hidden { display:none; }
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: #111;
+    color: #fff;
+    padding: 20px;
+  }
+  button {
+    padding: 15px 25px;
+    margin: 10px;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  .hidden {
+    display: none;
+  }
 </style>
 </head>
+
 <body>
 
 <h1>🎉 New Year Party 🎉</h1>
 
-<div id="role">
-  <button onclick="setRole('master')">Quiz Master</button>
-  <button onclick="setRole('player')">Player</button>
+<!-- ROLE SELECTION -->
+<div id="roleScreen">
+  <h2>Choose your role</h2>
+  <button onclick="setRole('master')">🎤 Quiz Master</button>
+  <button onclick="setRole('player')">🙋 Player</button>
 </div>
 
-<div id="vote" class="hidden">
-  <h2>Vote what we do</h2>
-  <button onclick="vote('Quiz')">Quiz</button>
-  <button onclick="vote('Games')">Games</button>
-  <button onclick="vote('Music')">Music</button>
+<!-- VOTING SCREEN -->
+<div id="voteScreen" class="hidden">
+  <h2>Vote: What should we do?</h2>
+  <button onclick="vote('Quiz')">🧠 Quiz</button>
+  <button onclick="vote('Games')">🎮 Games</button>
+  <button onclick="vote('Music')">🎵 Music</button>
+  <p id="voteMsg"></p>
 </div>
 
-<div id="master" class="hidden">
-  <h2>Quiz Master</h2>
-  <button onclick="endVote()">TIME’S UP</button>
+<!-- MASTER CONTROLS -->
+<div id="masterScreen" class="hidden">
+  <h2>Live Votes</h2>
   <div id="results"></div>
+  <button onclick="endVote()">⏱ TIME’S UP</button>
 </div>
 
-<div id="quiz" class="hidden">
-  <h2 id="question">2 + 2 = ?</h2>
+<!-- QUIZ SCREEN -->
+<div id="quizScreen" class="hidden">
+  <h2>Quiz Time!</h2>
+  <p id="question">2 + 2 = ?</p>
   <button onclick="answer(4)">4</button>
   <button onclick="answer(3)">3</button>
   <button onclick="answer(5)">5</button>
   <button onclick="answer(22)">22</button>
+  <p id="quizMsg"></p>
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbzz2B4D3wBgDG-AP5QhYXNhLB5eP0UG4VlasK2CvIVShJR_BMfF9K2bszLDgLDrgNMX8w/exec";
-const device = localStorage.device || (localStorage.device = Math.random());
+/* 🔴 PASTE YOUR APPS SCRIPT /exec URL HERE 🔴 */
+const API_URL = "https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLgt08pCLYUrLaFRv-ehEfrma9chf3Sa6jvvtkHgGCB7j6HoEnxvoxh6mPVYD45DYjDO9R8nEo847zMxarp9GGSiRk60acKmldGDEyRhJG7O4VsvK_0YSUasFkbmsG3tt8EfEBdQXMuuIBltgK_bdKz7ZdSjDGdy2ReSFy4sAfH6mUwRDWHZJPypmT69EVbxoahE71YlGSgFEr4rDA3xREll6MrjXCuagSD1D2Uozo3m0mfTHk7newDsxfES7tYa3NkZOwlorKoy230o2HcvvkLg1nrUbeOCiMmANOGv&lib=MPKv64G8uSqh63gOMII5c4Ng4AQptJ_cO";
 
-function setRole(r){
-  localStorage.role = r;
-  document.getElementById("role").classList.add("hidden");
-  document.getElementById("vote").classList.remove("hidden");
-  if(r==="master") document.getElementById("master").classList.remove("hidden");
+/* unique device id */
+if (!localStorage.deviceId) {
+  localStorage.deviceId = Math.random().toString(36).substring(2);
+}
+const deviceId = localStorage.deviceId;
+
+/* role handling */
+function setRole(role) {
+  localStorage.role = role;
+  document.getElementById("roleScreen").classList.add("hidden");
+  document.getElementById("voteScreen").classList.remove("hidden");
+
+  if (role === "master") {
+    document.getElementById("masterScreen").classList.remove("hidden");
+  }
 }
 
-function vote(opt){
-  if(localStorage.voted) return alert("Already voted");
-  fetch(API,{method:"POST",body:JSON.stringify({type:"vote",option:opt})});
-  localStorage.voted=true;
+/* vote */
+function vote(option) {
+  if (localStorage.voted) {
+    document.getElementById("voteMsg").innerText = "You already voted!";
+    return;
+  }
+
+  fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      type: "vote",
+      option: option
+    })
+  });
+
+  localStorage.voted = "true";
+  document.getElementById("voteMsg").innerText = "Vote submitted 🎉";
 }
 
-function endVote(){
-  fetch(API,{method:"POST",body:JSON.stringify({type:"setMode",mode:"quiz"})});
-}
-
-function answer(val){
-  if(localStorage.answered) return;
-  if(val===4){
-    fetch(API,{method:"POST",body:JSON.stringify({type:"score",device,score:1})});
-    alert("Correct!");
-  } else alert("Wrong!");
-  localStorage.answered=true;
-}
-
-function poll(){
-  fetch(API).then(r=>r.json()).then(d=>{
-    if(d.mode==="quiz"){
-      document.getElementById("vote").classList.add("hidden");
-      document.getElementById("quiz").classList.remove("hidden");
-    }
-    let out="";
-    for(let k in d.votes) out+=`${k}: ${d.votes[k]}<br>`;
-    document.getElementById("results").innerHTML=out;
+/* end vote */
+function endVote() {
+  fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      type: "setMode",
+      mode: "quiz"
+    })
   });
 }
 
-setInterval(poll,2000);
-</script>
+/* quiz answer */
+function answer(value) {
+  if (localStorage.answered) return;
 
-</body>
-</html>
+  if (value === 4) {
+    fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "score",
+        device: deviceId,
+        score: 1
+      })
+    });
+    document.getElementById("quizMsg").innerText = "✅ Correct!";
+  } else {
+    document.getElementById("quizMsg").innerText = "❌ Wrong!";
+  }
 
+  localStorage.answered = "true";
+}
+
+/* poll backend every 2 seconds */
+function poll() {
+  fetch(API_URL)
+    .then(res => res.json())
+    .then(data => {
+
+      /* update live votes */
+      let html = "";
+      for (let k in data.votes) {
+        html += `<p>${k}: ${data.votes[k]}</p>`;
+      }
+      document.getElementById("results").innerHTML = html;
+
+      /* switch everyone to quiz */
+      if (data.mode === "quiz") {
+        document.getElementById("voteScreen").classList.add("hidden");
+        document.getElementById("masterScreen").classList.add("hidden");
+        document.getElementById("quizScreen").classList.remove("hidden");
+      }
+    });
