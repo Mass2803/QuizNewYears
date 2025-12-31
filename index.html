@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>New Year Party</title>
+<style>
+body { font-family: Arial; text-align:center; }
+button { padding:15px; margin:10px; font-size:18px; }
+.hidden { display:none; }
+</style>
+</head>
+<body>
+
+<h1>🎉 New Year Party 🎉</h1>
+
+<div id="role">
+  <button onclick="setRole('master')">Quiz Master</button>
+  <button onclick="setRole('player')">Player</button>
+</div>
+
+<div id="vote" class="hidden">
+  <h2>Vote what we do</h2>
+  <button onclick="vote('Quiz')">Quiz</button>
+  <button onclick="vote('Games')">Games</button>
+  <button onclick="vote('Music')">Music</button>
+</div>
+
+<div id="master" class="hidden">
+  <h2>Quiz Master</h2>
+  <button onclick="endVote()">TIME’S UP</button>
+  <div id="results"></div>
+</div>
+
+<div id="quiz" class="hidden">
+  <h2 id="question">2 + 2 = ?</h2>
+  <button onclick="answer(4)">4</button>
+  <button onclick="answer(3)">3</button>
+  <button onclick="answer(5)">5</button>
+  <button onclick="answer(22)">22</button>
+</div>
+
+<script>
+const API = "Phttps://script.google.com/macros/s/AKfycbzz2B4D3wBgDG-AP5QhYXNhLB5eP0UG4VlasK2CvIVShJR_BMfF9K2bszLDgLDrgNMX8w/exec";
+const device = localStorage.device || (localStorage.device = Math.random());
+
+function setRole(r){
+  localStorage.role = r;
+  document.getElementById("role").classList.add("hidden");
+  document.getElementById("vote").classList.remove("hidden");
+  if(r==="master") document.getElementById("master").classList.remove("hidden");
+}
+
+function vote(opt){
+  if(localStorage.voted) return alert("Already voted");
+  fetch(API,{method:"POST",body:JSON.stringify({type:"vote",option:opt})});
+  localStorage.voted=true;
+}
+
+function endVote(){
+  fetch(API,{method:"POST",body:JSON.stringify({type:"setMode",mode:"quiz"})});
+}
+
+function answer(val){
+  if(localStorage.answered) return;
+  if(val===4){
+    fetch(API,{method:"POST",body:JSON.stringify({type:"score",device,score:1})});
+    alert("Correct!");
+  } else alert("Wrong!");
+  localStorage.answered=true;
+}
+
+function poll(){
+  fetch(API).then(r=>r.json()).then(d=>{
+    if(d.mode==="quiz"){
+      document.getElementById("vote").classList.add("hidden");
+      document.getElementById("quiz").classList.remove("hidden");
+    }
+    let out="";
+    for(let k in d.votes) out+=`${k}: ${d.votes[k]}<br>`;
+    document.getElementById("results").innerHTML=out;
+  });
+}
+
+setInterval(poll,2000);
+</script>
+
+</body>
+</html>
